@@ -1,0 +1,73 @@
+version: '3.8'
+services:
+  python-app:
+    image: python:3.12
+    container_name: python_app
+    volumes:
+      - ./app:/usr/src/app
+    working_dir: /usr/src/app
+    command: python script.py
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - influxdb
+
+  influxdb:
+    image: influxdb:latest
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=mydatabase
+      - INFLUXDB_ADMIN_USER=admin
+      - INFLUXDB_ADMIN_PASSWORD=admin123
+      - INFLUXDB_USER=user
+      - INFLUXDB_USER_PASSWORD=user123
+    volumes:
+      - influxdb_data:/var/lib/influxdb
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+    depends_on:
+      - influxdb
+
+  node-red:
+    image: nodered/node-red:latest
+    container_name: node-red
+    ports:
+      - "1880:1880"
+    volumes:
+      - node_red_data:/data
+    depends_on:
+      - influxdb
+
+  flink-jobmanager:
+    image: flink:latest
+    container_name: flink_jobmanager
+    ports:
+      - "8081:8081"
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+    command: jobmanager
+
+  flink-taskmanager:
+    image: flink:latest
+    container_name: flink_taskmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=flink-jobmanager
+    command: taskmanager
+    depends_on:
+      - flink-jobmanager
+
+volumes:
+  grafana_data:
+  influxdb_data:
+  node_red_data:
