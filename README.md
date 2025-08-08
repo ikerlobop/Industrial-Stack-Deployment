@@ -1,4 +1,4 @@
-# Industrial Data Stack
+# Industrial Stack Deployment
 
 Este proyecto contiene una arquitectura ligera para el procesamiento, visualización y gestión de datos industriales usando Docker Compose. Integra múltiples servicios útiles para entornos de IoT, automatización y análisis en tiempo real.
 
